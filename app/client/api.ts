@@ -1,14 +1,11 @@
 import { getClientConfig } from "../config/client";
 import {
   ACCESS_CODE_PREFIX,
-  Azure,
   ModelProvider,
   ServiceProvider,
 } from "../constant";
 import { ChatMessage, ModelType, useAccessStore, useChatStore } from "../store";
 import { ChatGPTApi } from "./platforms/openai";
-import { GeminiProApi } from "./platforms/google";
-import { ClaudeApi } from "./platforms/anthropic";
 export const ROLES = ["system", "user", "assistant"] as const;
 export type MessageRole = (typeof ROLES)[number];
 
@@ -95,16 +92,7 @@ export class ClientApi {
   public llm: LLMApi;
 
   constructor(provider: ModelProvider = ModelProvider.GPT) {
-    switch (provider) {
-      case ModelProvider.GeminiPro:
-        this.llm = new GeminiProApi();
-        break;
-      case ModelProvider.Claude:
-        this.llm = new ClaudeApi();
-        break;
-      default:
-        this.llm = new ChatGPTApi();
-    }
+    this.llm = new ChatGPTApi();
   }
 
   config() {}
@@ -160,20 +148,15 @@ export function getHeaders() {
     Accept: "application/json",
   };
   const modelConfig = useChatStore.getState().currentSession().mask.modelConfig;
-  const isGoogle = modelConfig.model.startsWith("gemini");
-  const isAzure = accessStore.provider === ServiceProvider.Azure;
-  const authHeader = isAzure ? "api-key" : "Authorization";
-  const apiKey = isGoogle
-    ? accessStore.googleApiKey
-    : isAzure
-    ? accessStore.azureApiKey
-    : accessStore.openaiApiKey;
+
+  const authHeader = "Authorization";
+  const apiKey = accessStore.openaiApiKey;
   const clientConfig = getClientConfig();
-  const makeBearer = (s: string) => `${isAzure ? "" : "Bearer "}${s.trim()}`;
+  const makeBearer = (s: string) => `${"Bearer "}${s.trim()}`;
   const validString = (x: string) => x && x.length > 0;
 
   // when using google api in app, not set auth header
-  if (!(isGoogle && clientConfig?.isApp)) {
+  if (!clientConfig?.isApp) {
     // use user's api key first
     if (validString(apiKey)) {
       headers[authHeader] = makeBearer(apiKey);

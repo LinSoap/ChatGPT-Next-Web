@@ -20,7 +20,6 @@ import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
 import { nanoid } from "nanoid";
 import { createPersistStore } from "../utils/store";
-import { identifyDefaultClaudeModel } from "../utils/checkers";
 import { collectModelsWithDefaultModel } from "../utils/model";
 import { useAccessStore } from "./access";
 
@@ -97,12 +96,9 @@ function getSummarizeModel(currentModel: string) {
       accessStore.defaultModel,
     );
     const summarizeModel = allModel.find(
-      (m) => m.name === SUMMARIZE_MODEL && m.available,
+      (m: any) => m.name === SUMMARIZE_MODEL && m.available,
     );
     return summarizeModel?.name ?? currentModel;
-  }
-  if (currentModel.startsWith("gemini")) {
-    return GEMINI_SUMMARIZE_MODEL;
   }
   return currentModel;
 }
@@ -364,13 +360,7 @@ export const useChatStore = createPersistStore(
         });
 
         var api: ClientApi;
-        if (modelConfig.model.startsWith("gemini")) {
-          api = new ClientApi(ModelProvider.GeminiPro);
-        } else if (identifyDefaultClaudeModel(modelConfig.model)) {
-          api = new ClientApi(ModelProvider.Claude);
-        } else {
-          api = new ClientApi(ModelProvider.GPT);
-        }
+        api = new ClientApi(ModelProvider.GPT);
 
         // make request
         api.llm.chat({
@@ -550,13 +540,7 @@ export const useChatStore = createPersistStore(
         const modelConfig = session.mask.modelConfig;
 
         var api: ClientApi;
-        if (modelConfig.model.startsWith("gemini")) {
-          api = new ClientApi(ModelProvider.GeminiPro);
-        } else if (identifyDefaultClaudeModel(modelConfig.model)) {
-          api = new ClientApi(ModelProvider.Claude);
-        } else {
-          api = new ClientApi(ModelProvider.GPT);
-        }
+        api = new ClientApi(ModelProvider.GPT);
 
         // remove error messages if any
         const messages = session.messages;

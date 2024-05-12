@@ -314,13 +314,7 @@ export function PreviewActions(props: {
     setShouldExport(false);
 
     var api: ClientApi;
-    if (config.modelConfig.model.startsWith("gemini")) {
-      api = new ClientApi(ModelProvider.GeminiPro);
-    } else if (identifyDefaultClaudeModel(config.modelConfig.model)) {
-      api = new ClientApi(ModelProvider.Claude);
-    } else {
-      api = new ClientApi(ModelProvider.GPT);
-    }
+    api = new ClientApi(ModelProvider.GPT);
 
     api
       .share(msgs)

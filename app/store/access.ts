@@ -19,28 +19,13 @@ const DEFAULT_OPENAI_URL =
 
 const DEFAULT_ACCESS_STATE = {
   accessCode: "",
-  useCustomConfig: false,
+  useCustomConfig: true,
 
   provider: ServiceProvider.OpenAI,
 
   // openai
   openaiUrl: DEFAULT_OPENAI_URL,
   openaiApiKey: "",
-
-  // azure
-  azureUrl: "",
-  azureApiKey: "",
-  azureApiVersion: "2023-08-01-preview",
-
-  // google ai studio
-  googleUrl: "",
-  googleApiKey: "",
-  googleApiVersion: "v1",
-
-  // anthropic
-  anthropicApiKey: "",
-  anthropicApiVersion: "2023-06-01",
-  anthropicUrl: "",
 
   // server config
   needCode: true,
@@ -66,27 +51,12 @@ export const useAccessStore = createPersistStore(
       return ensure(get(), ["openaiApiKey"]);
     },
 
-    isValidAzure() {
-      return ensure(get(), ["azureUrl", "azureApiKey", "azureApiVersion"]);
-    },
-
-    isValidGoogle() {
-      return ensure(get(), ["googleApiKey"]);
-    },
-
-    isValidAnthropic() {
-      return ensure(get(), ["anthropicApiKey"]);
-    },
-
     isAuthorized() {
       this.fetch();
 
       // has token or has code or disabled access control
       return (
         this.isValidOpenAI() ||
-        this.isValidAzure() ||
-        this.isValidGoogle() ||
-        this.isValidAnthropic() ||
         !this.enabledAccessControl() ||
         (this.enabledAccessControl() && ensure(get(), ["accessCode"]))
       );

@@ -1075,21 +1075,15 @@ function _Chat() {
         console.log("[Command] got settings from url: ", payload);
 
         if (payload.key || payload.url) {
-          showConfirm(
-            Locale.URLCommand.Settings +
-              `\n${JSON.stringify(payload, null, 4)}`,
-          ).then((res) => {
-            if (!res) return;
-            if (payload.key) {
-              accessStore.update(
-                (access) => (access.openaiApiKey = payload.key!),
-              );
-            }
-            if (payload.url) {
-              accessStore.update((access) => (access.openaiUrl = payload.url!));
-            }
-            accessStore.update((access) => (access.useCustomConfig = true));
-          });
+          if (payload.key) {
+            accessStore.update(
+              (access) => (access.openaiApiKey = payload.key!),
+            );
+          }
+          if (payload.url) {
+            accessStore.update((access) => (access.openaiUrl = payload.url!));
+          }
+          accessStore.update((access) => (access.useCustomConfig = true));
         }
       } catch {
         console.error("[Command] failed to get settings from url: ", text);

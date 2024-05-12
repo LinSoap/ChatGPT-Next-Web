@@ -5,7 +5,6 @@ import {
   DEFAULT_MODELS,
   OpenaiPath,
   REQUEST_TIMEOUT_MS,
-  ServiceProvider,
 } from "@/app/constant";
 import { useAccessStore, useAppConfig, useChatStore } from "@/app/store";
 
@@ -24,7 +23,6 @@ import {
 } from "@fortaine/fetch-event-source";
 import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
-import { makeAzurePath } from "@/app/azure";
 import {
   getMessageTextContent,
   getMessageImages,
@@ -62,21 +60,7 @@ export class ChatGPTApi implements LLMApi {
 
     let baseUrl = "";
 
-    if (accessStore.useCustomConfig) {
-      const isAzure = accessStore.provider === ServiceProvider.Azure;
-
-      if (isAzure && !accessStore.isValidAzure()) {
-        throw Error(
-          "incomplete azure config, please check it in your settings page",
-        );
-      }
-
-      if (isAzure) {
-        path = makeAzurePath(path, accessStore.azureApiVersion);
-      }
-
-      baseUrl = isAzure ? accessStore.azureUrl : accessStore.openaiUrl;
-    }
+    baseUrl = accessStore.openaiUrl;
 
     if (baseUrl.length === 0) {
       const isApp = !!getClientConfig()?.isApp;
@@ -252,17 +236,9 @@ export class ChatGPTApi implements LLMApi {
                 remainText += delta;
               }
 
-              if (
-                textmoderation &&
-                textmoderation.length > 0 &&
-                ServiceProvider.Azure
-              ) {
+              if (textmoderation && textmoderation.length > 0) {
                 const contentFilterResults =
                   textmoderation[0]?.content_filter_results;
-                console.log(
-                  `[${ServiceProvider.Azure}] [Text Moderation] flagged categories result:`,
-                  contentFilterResults,
-                );
               }
             } catch (e) {
               console.error("[Request] parse error", text, msg);
