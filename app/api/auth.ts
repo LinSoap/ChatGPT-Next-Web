@@ -66,21 +66,7 @@ export function auth(req: NextRequest, modelProvider: ModelProvider) {
 
     let systemApiKey: string | undefined;
 
-    switch (modelProvider) {
-      case ModelProvider.GeminiPro:
-        systemApiKey = serverConfig.googleApiKey;
-        break;
-      case ModelProvider.Claude:
-        systemApiKey = serverConfig.anthropicApiKey;
-        break;
-      case ModelProvider.GPT:
-      default:
-        if (serverConfig.isAzure) {
-          systemApiKey = serverConfig.azureApiKey;
-        } else {
-          systemApiKey = serverConfig.apiKey;
-        }
-    }
+    systemApiKey = serverConfig.apiKey;
 
     if (systemApiKey) {
       console.log("[Auth] use system api key");
